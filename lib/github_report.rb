@@ -4,12 +4,12 @@ require 'octokit'
 require 'pry'
 
 class GithubReport
-  def initialize(from: Date.today.to_s.delete('-'), to: Date.today.to_s.delete('-'))
+  def initialize(from: Date.today.to_s, to: Date.today.to_s)
     @client = Octokit::Client.new(access_token: ENV['GITHUB_REPORT_ACCESS_TOKEN'])
     # contributionsCollection の args として渡す Datetime は iso8601 に則った形式にしないといけないためこうしている
     # see https://developer.github.com/v4/object/user/#contributionscollection
-    @from_date = "#{from[0..3]}-#{from[4..5]}-#{from[6..7]}T00:00:00+09:00"
-    @to_date = "#{to[0..3]}-#{to[4..5]}-#{to[6..7]}T00:00:00+09:00"
+    @from_date = "#{from}T00:00:00+09:00"
+    @to_date = "#{to}T00:00:00+09:00"
   end
 
   def list
@@ -61,4 +61,4 @@ class GithubReport
   end
 end
 
-GithubReport.new(from: '20190101', to: '20190325').list
+GithubReport.new(from: '2019-01-01', to: '2019-03-25').list
