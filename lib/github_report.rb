@@ -50,6 +50,9 @@ class GithubReport
     end
   end
 
+  # github api からのレスポンスは Sawyer::Resource オブジェクトで、構造は Hash っぽいけどメソッド呼び出しの形でアクセスできる
+  # see https://github.com/lostisland/sawyer
+  # @return [Sawyer::Resource]
   def fetch_query
     query = File.read('./lib/contributionsCollection.gql')
 
