@@ -3,31 +3,61 @@ require 'json'
 require 'octokit'
 require 'pry'
 
-client = Octokit::Client.new(access_token: ENV['GITHUB_REPORT_ACCESS_TOKEN'])
+class GithubReport
+  def self.list
+    new.list
+  end
 
-query = File.read('./lib/contributionsCollection.gql')
+  def initialize
+    @client = Octokit::Client.new(access_token: ENV['GITHUB_REPORT_ACCESS_TOKEN'])
+    @from_date = DateTime.iso8601('2019-01-01T00:00:00+09:00')
+    @to_date = DateTime.iso8601('2019-03-25T00:00:00+09:00')
+  end
 
-var = { from_date: DateTime.iso8601('2019-01-01T00:00:00+09:00'), to_date: DateTime.iso8601('2019-03-25T00:00:00+09:00') }
+  def list
+    contributions_collection = fetch_query.data.viewer.contributionsCollection
 
-param = { query: query, variables: var }.to_json
+    grouped_issue = group_edges(contributions_collection, type: :issue)
+    grouped_pr = group_edges(contributions_collection, type: :pullRequest)
 
-r = client.post('/graphql', param)
-grouped_issue = r.data.viewer.contributionsCollection.issueContributions.edges.group_by { |edge| edge.node.issue.repository.nameWithOwner }
-grouped_pr = r.data.viewer.contributionsCollection.pullRequestContributions.edges.group_by { |edge| edge.node.pullRequest.repository.nameWithOwner }
+    issue_and_pr = merge_issue_and_pr(grouped_issue, grouped_pr)
+    puts_list(issue_and_pr)
+  end
 
-puts 'Issues'
-grouped_issue.each do |title, values|
-  puts "\n### #{title}\n\n"
-  values.each do |val|
-    puts "- [#{val.node.issue.title}](#{val.node.issue.url}) #{val.node.issue.state}"
+  private
+
+  attr_reader :client, :from_date, :to_date
+
+  def puts_list(issue_and_pr)
+    issue_and_pr.each do |title, values|
+      puts "\n### #{title}\n\n"
+      values.each do |value|
+        puts "- [#{value.node.issue.title}](#{value.node.issue.url}) #{value.node.issue.state}" if value.node.issue?
+        puts "- [#{value.node.pullRequest.title}](#{value.node.pullRequest.url}) #{value.node.pullRequest.state}" if value.node.pullRequest?
+      end
+    end
+  end
+
+  def group_edges(contributions_collection, type:)
+    contributions_collection.send("#{type}Contributions".to_sym).edges.group_by do |edge|
+      edge.node.send(type).repository.nameWithOwner
+    end
+  end
+
+  def merge_issue_and_pr(grouped_issue, grouped_pr)
+    grouped_issue.merge(grouped_pr) do |_, issue_val, pr_val|
+      issue_val + pr_val
+    end
+  end
+
+  def fetch_query
+    query = File.read('./lib/contributionsCollection.gql')
+
+    variables = { from_date: from_date, to_date: to_date }
+    params = { query: query, variables: variables }.to_json
+
+    client.post('/graphql', params)
   end
 end
 
-puts
-puts 'PRs'
-grouped_pr.each do |title, values|
-  puts "\n### #{title}\n\n"
-  values.each do |val|
-    puts "- [#{val.node.pullRequest.title}](#{val.node.pullRequest.url}) #{val.node.pullRequest.state}"
-  end
-end
+GithubReport.list
