@@ -13,10 +13,10 @@ class GithubReport
   end
 
   def list
-    contributions_collection = fetch_query.data.viewer.contributionsCollection
+    contributions = fetch_query.data.viewer.contributionsCollection
 
-    grouped_issue = group_edges(contributions_collection, type: :issue)
-    grouped_pr = group_edges(contributions_collection, type: :pullRequest)
+    grouped_issue = group_edges(contributions, type: :issue)
+    grouped_pr = group_edges(contributions, type: :pullRequest)
 
     issue_and_pr = merge_issue_and_pr(grouped_issue, grouped_pr)
     puts_list(issue_and_pr)
@@ -26,6 +26,9 @@ class GithubReport
 
   attr_reader :client, :from_date, :to_date
 
+  # Issue と PR のリストを標準出力に出力する
+  # @param issue_and_pr [Hash<Array>]
+  # @return [void]
   def puts_list(issue_and_pr)
     issue_and_pr.each do |title, values|
       puts "\n### #{title}\n\n"
@@ -36,12 +39,18 @@ class GithubReport
     end
   end
 
-  def group_edges(contributions_collection, type:)
-    contributions_collection.send("#{type}Contributions".to_sym).edges.group_by do |edge|
+  # @param contributions [Hash]
+  # @param type [Symbol] :issue or :pullRequest
+  # @return [Hash<Array>] Value の Array をレポジトリ名でグルーピングした Hash を返す
+  def group_edges(contributions, type:)
+    contributions.send("#{type}Contributions".to_sym).edges.group_by do |edge|
       edge.node.send(type).repository.nameWithOwner
     end
   end
 
+  # @param grouped_issue [Hash<Array>]
+  # @param grouped_pr [Hash<Array>]
+  # @return [Hash<Array>]
   def merge_issue_and_pr(grouped_issue, grouped_pr)
     grouped_issue.merge(grouped_pr) do |_, issue_val, pr_val|
       issue_val + pr_val
