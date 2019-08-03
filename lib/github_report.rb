@@ -28,10 +28,11 @@ class GithubReport
 
   attr_reader :client, :from_date, :to_date
 
-  # octokit のレスポンスは Sawyer::Resource オブジェクトで、構造は Hash っぽいけどメソッド呼び出しの形でもアクセスできる
-  # 便利な反面 Hash のメソッドは持っておらず `#dig` などが使えない
-  # Sawyer::Resource の仕様に依存した実装は汎用性に欠けるため、 `#to_h` して返すようにしている
-  # see https://github.com/lostisland/sawyer
+  # octokit のレスポンスである Sawyer::Resource オブジェクトの仕様に依存した実装は汎用性に欠けるため、 `#to_h` して返すようにしている
+  #   以下、 Sawyer::Resource の特徴
+  #   - 構造は Hash っぽいけどメソッド呼び出しの形でも Value にアクセスできる
+  #   - Hash のメソッドは持っておらず `Hash#dig` などが使えない
+  #   see https://github.com/lostisland/sawyer
   # @return [Hash]
   def fetch_query
     query = File.read('./lib/contributionsCollection.gql')
@@ -39,6 +40,7 @@ class GithubReport
     variables = { from_date: from_date, to_date: to_date }
     params = { query: query, variables: variables }.to_json
 
+    # Sawyer::Resource が返ってくる
     response = client.post('/graphql', params)
     response.to_h
   end
