@@ -26,7 +26,7 @@ class GithubReport
 
   attr_reader :client, :from_date, :to_date
 
-  # github api からのレスポンスは Sawyer::Resource オブジェクトで、構造は Hash っぽいけどメソッド呼び出しの形でアクセスできる
+  # octokit のレスポンスは Sawyer::Resource オブジェクトで、構造は Hash っぽいけどメソッド呼び出しの形でアクセスできる
   # see https://github.com/lostisland/sawyer
   # @return [Sawyer::Resource]
   def fetch_query
