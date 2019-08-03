@@ -9,7 +9,7 @@ query = <<~GRAPHQL
   query($from_date: DateTime!, $to_date: DateTime!) {
     viewer {
       contributionsCollection(from: $from_date, to: $to_date) {
-        issueContributions(last: 100) {
+        issueContributions(last: 100, orderBy: { direction: ASC }) {
           edges {
             node {
               issue {
@@ -23,7 +23,7 @@ query = <<~GRAPHQL
             }
           }
         }
-        pullRequestContributions(last: 100) {
+        pullRequestContributions(last: 100, orderBy: { direction: ASC }) {
           edges {
             node {
               pullRequest {
