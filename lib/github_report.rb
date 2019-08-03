@@ -15,7 +15,7 @@ class GithubReport
   end
 
   def list
-    contributions = fetch_query.data.viewer.contributionsCollection
+    contributions = fetch_query.dig(:data, :viewer, :contributionsCollection)
 
     grouped_issue = group_edges(contributions, type: :issue)
     grouped_pr = group_edges(contributions, type: :pullRequest)
@@ -28,24 +28,32 @@ class GithubReport
 
   attr_reader :client, :from_date, :to_date
 
-  # octokit のレスポンスは Sawyer::Resource オブジェクトで、構造は Hash っぽいけどメソッド呼び出しの形でアクセスできる
-  # see https://github.com/lostisland/sawyer
-  # @return [Sawyer::Resource]
+  # octokit のレスポンスである Sawyer::Resource オブジェクトの仕様に依存した実装は汎用性に欠けるため、 `#to_h` して返すようにしている
+  #   以下、 Sawyer::Resource の特徴
+  #   - 構造は Hash っぽいけどメソッド呼び出しの形でも Value にアクセスできる
+  #   - Hash のメソッドは持っておらず `Hash#dig` などが使えない
+  #   see https://github.com/lostisland/sawyer
+  # @return [Hash]
   def fetch_query
     query = File.read('./lib/contributionsCollection.gql')
 
     variables = { from_date: from_date, to_date: to_date }
     params = { query: query, variables: variables }.to_json
 
-    client.post('/graphql', params)
+    # Sawyer::Resource が返ってくる
+    response = client.post('/graphql', params)
+    response.to_h
   end
 
   # @param contributions [Hash]
   # @param type [Symbol] :issue or :pullRequest
   # @return [Hash<Symbol, Array>] レポジトリ名でグルーピングした Hash を返す
+  # @todo type（:issue or :pullRequest）の動的な判定が `#puts_list` の中にもあるので、共通化できそうならする
+  #   - pullRequestReviewContributions も取得したいとなった場合は共通化必須
+  #   - `Hash#transform_keys` を使って :issue, :pullRequest, :pullRequestReview の違いを吸収するようなイメージ
   def group_edges(contributions, type:)
-    contributions.send("#{type}Contributions".to_sym).edges.group_by do |edge|
-      edge.node.send(type).repository.nameWithOwner
+    contributions.dig("#{type}Contributions".to_sym, :edges).group_by do |edge|
+      edge.dig(:node, type, :repository, :nameWithOwner)
     end
   end
 
@@ -65,8 +73,10 @@ class GithubReport
     issue_and_pr.each do |title, values|
       puts "\n### #{title}\n\n"
       values.each do |value|
-        puts "- [#{value.node.issue.title}](#{value.node.issue.url}) #{value.node.issue.state}" if value.node.issue?
-        puts "- [#{value.node.pullRequest.title}](#{value.node.pullRequest.url}) #{value.node.pullRequest.state}" if value.node.pullRequest?
+        type = value[:node].key?(:issue) ? :issue : :pullRequest
+        target = value.dig(:node, type)
+
+        puts "- [#{target[:title]}](#{target[:url]}) #{target[:state]}"
       end
     end
   end
