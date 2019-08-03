@@ -46,6 +46,9 @@ class GithubReport
   # @param contributions [Hash]
   # @param type [Symbol] :issue or :pullRequest
   # @return [Hash<Symbol, Array>] レポジトリ名でグルーピングした Hash を返す
+  # @todo type（:issue or :pullRequest）の動的な判定が `#puts_list` の中にもあるので、共通化できそうならする
+  #   - pullRequestReviewContributions も取得したいとなった場合は共通化必須
+  #   - `Hash#transform_keys` を使って :issue, :pullRequest, :pullRequestReview の違いを吸収するようなイメージ
   def group_edges(contributions, type:)
     contributions.dig("#{type}Contributions".to_sym, :edges).group_by do |edge|
       edge.dig(:node, type, :repository, :nameWithOwner)
@@ -68,8 +71,10 @@ class GithubReport
     issue_and_pr.each do |title, values|
       puts "\n### #{title}\n\n"
       values.each do |value|
-        puts "- [#{value.dig(:node, :issue, :title)}](#{value.dig(:node, :issue, :url)}) #{value.dig(:node, :issue, :state)}" if value.dig(:node).keys.first == :issue
-        puts "- [#{value.dig(:node, :pullRequest, :title)}](#{value.dig(:node, :pullRequest, :url)}) #{value.dig(:node, :pullRequest, :state)}" if value.dig(:node).keys.first == :pullRequest
+        type = value[:node].key?(:issue) ? :issue : :pullRequest
+        target = value.dig(:node, type)
+
+        puts "- [#{target[:title]}](#{target[:url]}) #{target[:state]}"
       end
     end
   end
