@@ -5,42 +5,7 @@ require 'pry'
 
 client = Octokit::Client.new(login: ENV['GITHUB_REPORT_USER'], access_token: ENV['GITHUB_REPORT_ACCESS_TOKEN'])
 
-query = <<~GRAPHQL
-  query($from_date: DateTime!, $to_date: DateTime!) {
-    viewer {
-      contributionsCollection(from: $from_date, to: $to_date) {
-        issueContributions(last: 100, orderBy: { direction: ASC }) {
-          edges {
-            node {
-              issue {
-                title
-                url
-                state
-                repository {
-                  nameWithOwner
-                }
-              }
-            }
-          }
-        }
-        pullRequestContributions(last: 100, orderBy: { direction: ASC }) {
-          edges {
-            node {
-              pullRequest {
-                title
-                url
-                state
-                repository {
-                  nameWithOwner
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-GRAPHQL
+query = File.read('./lib/contributionsCollection.gql')
 
 var = { from_date: DateTime.iso8601('2019-01-01T00:00:00+09:00'), to_date: DateTime.iso8601('2019-03-25T00:00:00+09:00') }
 
