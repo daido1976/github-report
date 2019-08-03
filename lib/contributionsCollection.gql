@@ -1,0 +1,34 @@
+query($from_date: DateTime!, $to_date: DateTime!) {
+  viewer {
+    contributionsCollection(from: $from_date, to: $to_date) {
+      issueContributions(last: 100, orderBy: { direction: ASC }) {
+        edges {
+          node {
+            issue {
+              title
+              url
+              state
+              repository {
+                nameWithOwner
+              }
+            }
+          }
+        }
+      }
+      pullRequestContributions(last: 100, orderBy: { direction: ASC }) {
+        edges {
+          node {
+            pullRequest {
+              title
+              url
+              state
+              repository {
+                nameWithOwner
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
