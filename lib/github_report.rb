@@ -70,4 +70,4 @@ class GithubReport
   end
 end
 
-GithubReport.new(from: '2019-01-01', to: '2019-03-25').list
+GithubReport.new(from: Date.today.to_s, to: Date.today.to_s).list
