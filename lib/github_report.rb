@@ -26,17 +26,16 @@ class GithubReport
 
   attr_reader :client, :from_date, :to_date
 
-  # Issue と PR のリストを標準出力に出力する
-  # @param issue_and_pr [Hash<Array>]
-  # @return [void]
-  def puts_list(issue_and_pr)
-    issue_and_pr.each do |title, values|
-      puts "\n### #{title}\n\n"
-      values.each do |value|
-        puts "- [#{value.node.issue.title}](#{value.node.issue.url}) #{value.node.issue.state}" if value.node.issue?
-        puts "- [#{value.node.pullRequest.title}](#{value.node.pullRequest.url}) #{value.node.pullRequest.state}" if value.node.pullRequest?
-      end
-    end
+  # github api からのレスポンスは Sawyer::Resource オブジェクトで、構造は Hash っぽいけどメソッド呼び出しの形でアクセスできる
+  # see https://github.com/lostisland/sawyer
+  # @return [Sawyer::Resource]
+  def fetch_query
+    query = File.read('./lib/contributionsCollection.gql')
+
+    variables = { from_date: from_date, to_date: to_date }
+    params = { query: query, variables: variables }.to_json
+
+    client.post('/graphql', params)
   end
 
   # @param contributions [Hash]
@@ -57,16 +56,17 @@ class GithubReport
     end
   end
 
-  # github api からのレスポンスは Sawyer::Resource オブジェクトで、構造は Hash っぽいけどメソッド呼び出しの形でアクセスできる
-  # see https://github.com/lostisland/sawyer
-  # @return [Sawyer::Resource]
-  def fetch_query
-    query = File.read('./lib/contributionsCollection.gql')
-
-    variables = { from_date: from_date, to_date: to_date }
-    params = { query: query, variables: variables }.to_json
-
-    client.post('/graphql', params)
+  # Issue と PR のリストを標準出力に出力する
+  # @param issue_and_pr [Hash<Array>]
+  # @return [void]
+  def puts_list(issue_and_pr)
+    issue_and_pr.each do |title, values|
+      puts "\n### #{title}\n\n"
+      values.each do |value|
+        puts "- [#{value.node.issue.title}](#{value.node.issue.url}) #{value.node.issue.state}" if value.node.issue?
+        puts "- [#{value.node.pullRequest.title}](#{value.node.pullRequest.url}) #{value.node.pullRequest.state}" if value.node.pullRequest?
+      end
+    end
   end
 end
 
