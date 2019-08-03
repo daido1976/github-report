@@ -3,7 +3,7 @@ require 'json'
 require 'octokit'
 require 'pry'
 
-client = Octokit::Client.new(login: ENV['GITHUB_REPORT_USER'], access_token: ENV['GITHUB_REPORT_ACCESS_TOKEN'])
+client = Octokit::Client.new(access_token: ENV['GITHUB_REPORT_ACCESS_TOKEN'])
 
 query = File.read('./lib/contributionsCollection.gql')
 
