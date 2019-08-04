@@ -81,4 +81,4 @@ class GithubReport
   end
 end
 
-GithubReport.new(from: Date.today.to_s, to: Date.today.to_s).list
+GithubReport.new(from: ARGV[0], to: ARGV[1]).list
