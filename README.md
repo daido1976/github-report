@@ -12,7 +12,8 @@ I refered to the following library.
 
 Set `GITHUB_REPORT_ACCESS_TOKEN` into environment variables.
 
-```sh
+
+```
 # Print contributions for specified date range when given.
 $ bundle exec ruby lib/github_report.rb 2019-01-01 2019-01-31
 
