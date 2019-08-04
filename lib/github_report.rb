@@ -74,7 +74,7 @@ class GithubReport
         type = value[:node].key?(:issue) ? :issue : :pullRequest
         target = value.dig(:node, type)
 
-        puts "- [#{target[:title]}](#{target[:url]}) #{target[:state]}"
+        puts "- [#{target[:title]}](#{target[:url]}) **#{target[:state].downcase}!**"
       end
     end
   end
