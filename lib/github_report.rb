@@ -36,7 +36,7 @@ class GithubReport
 
     # contributionsCollection の args として渡す Datetime は iso8601 に則った形式にしないといけないためこうしている
     # see https://developer.github.com/v4/object/user/#contributionscollection
-    variables = { from_date: "#{from_date}T00:00:00+09:00", to_date: "#{to_date}T00:00:00+09:00" }
+    variables = { from_date_time: "#{from_date}T00:00:00+09:00", to_date_time: "#{to_date}T00:00:00+09:00" }
     params = { query: query, variables: variables }.to_json
 
     # Sawyer::Resource が返ってくる

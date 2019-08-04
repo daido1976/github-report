@@ -1,9 +1,9 @@
 # edges -> node ではなくて nodes を使う方がスッキリ書けるが、現状は Relay Connection の仕様に即した形で書いている
 # see https://developer.github.com/v4/object/createdissuecontributionconnection/
 # also see https://employment.en-japan.com/engineerhub/entry/2018/12/26/103000#Relay-Connection
-query($from_date: DateTime!, $to_date: DateTime!) {
+query($from_date_time: DateTime!, $to_date_time: DateTime!) {
   viewer {
-    contributionsCollection(from: $from_date, to: $to_date) {
+    contributionsCollection(from: $from_date_time, to: $to_date_time) {
       issueContributions(last: 100, orderBy: { direction: ASC }) {
         edges {
           node {
