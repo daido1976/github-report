@@ -61,7 +61,7 @@ class GithubReport
   # @param grouped_pr [Hash<Symbol, Array>]
   # @return [Hash<Symbol, Array>]
   def merge_issue_and_pr(grouped_issue, grouped_pr)
-    grouped_issue.merge(grouped_pr) do |_, issue_val, pr_val|
+    grouped_issue.merge(grouped_pr) do |_key, issue_val, pr_val|
       issue_val + pr_val
     end
   end
