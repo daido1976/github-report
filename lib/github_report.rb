@@ -66,7 +66,6 @@ class GithubReport
     end
   end
 
-  # Issue と PR のリストを標準出力に出力する
   # @param issue_and_pr [Hash<Symbol, Array>]
   # @return [void]
   def puts_list(issue_and_pr)
