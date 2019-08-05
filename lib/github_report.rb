@@ -1,7 +1,6 @@
 require 'date'
 require 'json'
 require 'octokit'
-require 'pry'
 
 class GithubReport
   # @param options [Hash] (e.g. { from: '2019-01-01', to: '2019-01-31' })
