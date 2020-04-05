@@ -10,8 +10,7 @@ I refered to the following library.
 
 ## Usage
 
-Set `GITHUB_REPORT_ACCESS_TOKEN` into environment variables.
-
+Set [`GITHUB_REPORT_ACCESS_TOKEN`](https://github.com/settings/tokens) into environment variables.
 
 ```sh
 # Print contributions for specified date range when given.
