@@ -84,3 +84,6 @@ build-iPhoneSimulator/
 .rvmrc
 
 # End of https://www.gitignore.io/api/ruby,macos
+
+# Used by direnv library to load environment variables.
+.envrc
